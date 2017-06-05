@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="120">
+<title>Smart mirror</title>
+<link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+<script src="js/angular.min.js"></script>
+<style>
+	* {
+		font-family:Arial;
+		font-size:26px;
+	}
+	body,h1 {
+		background:#000;
+		color:#fff;
+		direction:rtl;
+	}
+	
+	#header {
+		text-align:center;
+		font-size:32px;
+	}
+	#sundiv {
+		position:absolute;
+		top: 10px;
+		left:10px;
+	}
+	#newsfeed{
+		position:absolute;
+		top:200px;
+		left:10px;
+	}
+	#footer,#header {
+		text-align:center;
+		font-size:70px;
+		font-family: 'Orbitron', sans-serif; 
+		
+	}
+</style>
+</head>
+
+<body>
+ 
+<div ng-app="jsbin">
+	<div ng-controller="DemoCtrl as vm">
+		<h1 id="header">{{ vm.greeting }}
+			<br/>
+			<div id="footer"></div>
+		</h1>
+		<div>
+		היום יהיו {{ vm.desc }}<br/>
+		והטמפרטורה כרגע: {{ vm.temp }} מעלות<br/>
+		<br/>
+		<br/>	
+		<!--הטמפרטורות יהיו היום מ-{{ vm.temp_min }} מעלות בלילה ועד  {{ vm.temp_max }} מעלות בצהריי היום<br/>-->
+				
+		<div id="sundiv"><img src="{{ vm.img }}"/></div>
+		
+	</div>
+
+
+
+</div>
+<iframe id="newsfeed" frameborder="0" height="300" width="200" scrolling="no" src="https://ticker.mivzakim.net/ticker/category/1?fontsize=26&fontcolor=ffffff&bgcolor=000000&smooth=no&spacing=no&linkunderline=no&views=no&vlinkcolor=bgbgbg&linkcolor=ffffff"></iframe>
+<script>
+var w;
+
+angular.module('jsbin', [])
+   .controller('HelloWorldController', function($scope) {
+		
+});
+
+
+
+
+var app = angular.module('jsbin', []);
+
+app.controller('DemoCtrl', function($http) {
+  
+  var vm = this;
+  
+  var URL = 'http://api.openweathermap.org/data/2.5/weather';
+  
+  var request = {
+    method: 'GET',
+    url: URL,
+    params: {
+       id: '295064',
+      mode: 'json',
+      units: 'metric',
+      cnt: '7',
+      appid: '###' //get your appId from: http://openweathermap.org/appid
+    }
+  };
+  
+  var today = new Date()
+		var curHr = today.getHours()
+		if (curHr < 12) {
+		  vm.greeting = "בוקר טוב";
+		} else if (curHr < 18) {
+		  vm.greeting = "צהריים טובים";
+		} else {
+		  vm.greeting = "ערב טוב";
+		}
+  
+  $http(request)
+    .then(function(response) {
+     // vm.data = response.data;
+	  w = response.data;
+	 vm.desc =  translateW(w.weather[0].description);
+	 vm.temp =  w.main.temp;
+	 vm.temp_min =  w.main.temp_min;
+	 vm.temp_max =  w.main.temp_max;
+	 vm.img = "http://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/widgets/" + w.weather[0].icon + ".png"
+	 // vm.data = txt;	
+    }).
+    catch(function(response) {
+      vm.data = response.data;
+    });
+ 
+
+});
+
+
+	   
+function translateW(w){
+	switch(w.toString()){
+		case "clear sky": w = "שמיים בהירים";break;
+	}
+	return w;
+}
+function checkDate(){
+	var today = new Date();
+    var h = today.getHours();
+    var m = today.getMinutes();
+    var s = today.getSeconds();
+    m = checkTime(m);
+    s = checkTime(s);
+	
+	document.getElementById("footer").innerHTML = h + ":" + m + ":" + s
+	setTimeout(function(){ checkDate(); }, 1000);	
+}	   
+
+function checkTime(i) {
+    if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+    return i;
+}	
+checkDate();
+	   
+</script>
+
+
+				  
+</body>
+
+</html>
